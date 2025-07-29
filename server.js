@@ -17,41 +17,33 @@ const app = express();
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Update your CORS configuration
-app.use(cors({
-    origin: 'http://localhost:3000', // your React app URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// 🔓 Allow all origins (REMOVE CORS restrictions)
+app.use(cors());
 
+// Logger middleware
 app.use(logger);
 
-// Ensure the uploads directory is served properly
+// Static file serving (e.g., for images)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Update CORS configuration to allow image requests
-app.use(cors({
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    exposedHeaders: ['Content-Length', 'Content-Type']
-}));
-
-// Routes
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/blog', blogRoutes);
 
-// Connect to MongoDB
+// MongoDB connection
 const uri = process.env.MONGODB_URI;
 
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
     .then(() => console.log('MongoDB connected'))
     .catch(err => console.error('MongoDB connection error:', err));
 
-// Add error handling middleware last
+// Global error handler (must be last)
 app.use(errorHandler);
 
-// Start the server
+// Server start
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
